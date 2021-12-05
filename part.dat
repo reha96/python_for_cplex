@@ -1,0 +1,18 @@
+/*********************************************
+ * OPL 20.1.0.0 Data
+ * Author: Reha
+ * Creation Date: Feb 15, 2021 at 9:02:16 PM
+ *********************************************
+This is the .dat file for the partitioning algorithm
+ *********************************************/
+NR_PublicGoods=0;
+NR_PrivateGoods=2;
+
+SheetConnection comm("data.xlsx");
+
+NR_Observations=15;
+AllP from SheetRead(comm,"'data_t'!E171:F185");
+AllQ from SheetRead(comm,"'data_t'!C171:D185");
+Income from SheetRead(comm,"'data_t'!G171:G185");
+
+
