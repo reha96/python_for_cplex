@@ -1,6 +1,6 @@
 # thesis_to_paper
 
-This document has 2 parts:
+The readme document has 3 sections on:
 - The SOFTWARE needed to run the python code,
 - The FILES needed to run the python and cplex code,
 - The remarks about the python code.
