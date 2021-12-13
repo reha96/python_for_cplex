@@ -248,6 +248,7 @@ for x in range(len(df3)):
 
 x=0
 for x in range(len(df3)):    
+    df3[x] = df3[x].drop_duplicates(subset=['Obs_Char', 'State'], keep= 'first') 
     df3[x]['Sum_Types'] = df3[x].groupby(['Obs_Char'])['Types'].transform('sum')
     df3[x]['Ratio_'+ str(x+1)] = df3[x]['Sum_Types']/df3[x]['Sum_Types'][0]    
     df3[x]= df3[x].sort_values('Obs_Char')    
@@ -255,26 +256,24 @@ for x in range(len(df3)):
     with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\money_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
         df3[x].to_excel(writer, header=["Obs_Char", "State", "Types", "n", "Sum_Types", "Ratio"], index=False, sheet_name= str(x+1))
     
-df5 = df5.drop(['Types', 'n', 'Sum_Types'], 1)
+df5 = df5.drop(['Types', 'n', 'State', 'Sum_Types'], 'columns')
 df5 = df5.reset_index(drop=True)    
-df5 = df5.groupby(['Obs_Char', 'State'], as_index=False).sum()
+df5 = df5.groupby(['Obs_Char'], as_index=False).sum()
 df5 = df5.replace(0, np.nan)
+df5['Mean'] = df5.mean(axis=1, numeric_only=True)
+df5['Sample std'] = df5.std(axis=1, numeric_only=True)
 
-
-''' Way to find the best ratio (not accounting for equalities btwn ratios) - not useful anymore
-# for x in range(len(df3)):    
-#     df3[x]['Sum_Types'] = df3[x].groupby(['Obs_Char'])['Types'].transform('sum')
-#     df3[x]['Ratio'] = df3[x]['Sum_Types']/df3[x]['Sum_Types'][0]    
-#     df3[x]= df3[x].sort_values('Ratio')    
-#     df4[x] = df3[x][df3[x].Obs_Char.str.contains('and')][:1]
-#     df5 = df5.append(pd.DataFrame(list(zip(df4[x]['Obs_Char'], df4[x]['Ratio'])), columns =['Obs_Char', 'Ratio']))
-#     df5 = df5.reset_index(drop=True)
-#     with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\money_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
-#         df3[x].to_excel(writer, header=["Obs_Char", "State", "Types", "n", "Sum_Types", "Ratio"], index=False, sheet_name= str(x+1))
-'''    
+df_1 = df5[df5["Obs_Char"].str.contains("and")==False]
+df_2 = df5[df5["Obs_Char"].str.contains("and")==True]
+df_1 = df_1[df_1["Obs_Char"].str.contains("Allocation")==False]
 
 with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\money_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
-    df5.to_excel(writer, header=df5.columns, index=False, sheet_name= 'Results Matrix')
+    df_1.to_excel(writer, header=df_1.columns, index=False, sheet_name= '1-level Branching')
+
+with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\money_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
+    df_2.to_excel(writer, header=df_2.columns, index=False, sheet_name= '2-level Branching')
+
+
 
 '''
 4bis - calculate kappa ratios and report the results for time allocation task 
@@ -292,6 +291,7 @@ for x in range(len(df3bis)):
 
 x=0
 for x in range(len(df3bis)):    
+    df3bis[x] = df3bis[x].drop_duplicates(subset=['Obs_Char', 'State'], keep= 'first')
     df3bis[x]['Sum_Types'] = df3bis[x].groupby(['Obs_Char'])['Types'].transform('sum')
     df3bis[x]['Ratio_'+ str(x+1)] = df3bis[x]['Sum_Types']/df3bis[x]['Sum_Types'][0]    
     df3bis[x]= df3bis[x].sort_values('Obs_Char')    
@@ -299,14 +299,23 @@ for x in range(len(df3bis)):
     with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\time_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
         df3bis[x].to_excel(writer, header=["Obs_Char", "State", "Types", "n", "Sum_Types", "Ratio"], index=False, sheet_name= str(x+1))
     
-df5bis = df5bis.drop(['Types', 'n', 'Sum_Types'], 1)
+df5bis = df5bis.drop(['Types', 'n', 'State', 'Sum_Types'], 'columns')
 df5bis = df5bis.reset_index(drop=True)    
-df5bis = df5bis.groupby(['Obs_Char', 'State'], as_index=False).sum()
+df5bis = df5bis.groupby(['Obs_Char'], as_index=False).sum()
 df5bis = df5bis.replace(0, np.nan)
-    
+df5bis['Mean'] = df5bis.mean(axis=1, numeric_only=True)
+df5bis['Sample std'] = df5bis.std(axis=1, numeric_only=True) 
+   
+df_1bis = df5bis[df5bis["Obs_Char"].str.contains("and")==False]
+df_2bis = df5bis[df5bis["Obs_Char"].str.contains("and")==True]
+df_1bis = df_1bis[df_1bis["Obs_Char"].str.contains("Allocation")==False]
 
 with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\time_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
-    df5bis.to_excel(writer, header=df5bis.columns, index=False, sheet_name= 'Results Matrix')
+    df_1bis.to_excel(writer, header=df_1bis.columns, index=False, sheet_name= '1-level Branching')
+
+with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\time_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
+    df_2bis.to_excel(writer, header=df_2bis.columns, index=False, sheet_name= '2-level Branching')
+
 
 '''
 CONCLUDING INFORMATION
@@ -314,6 +323,4 @@ CONCLUDING INFORMATION
 elapsed = time.time() - t
 print('Computation done with ' + str(nb_draws) + ' subsamples whose size equals ' + str(sample_size*100) +  ' percent of the original data. \nTotal elapsed time (in seconds): ' 
       + str(elapsed) + '\nAverage loop length (in seconds): ' + str(elapsed/nb_draws))
-
-
 
