@@ -40,4 +40,4 @@ Make sure to:
 
 - Close Excel and ILOG Optimization Studio before running the code,
 
-- Check that ALL pathing is correct – adjust each highlighted line in the code accordingly! (You can do this by using the search & replace function in any compiler or by pressing Ctrl + F and searching for “C:\\Users\\Reha\\opl\\thesis\\”. Replace each occurrence with “C:\\Users\\user_name\\opl\\project_name\\”.)
+- Check that ALL pathing is correct – adjust each occurence in the code accordingly! (You can do this by using the search & replace function in any compiler or by pressing Ctrl + F and searching for “C:\\Users\\Reha\\opl\\thesis\\”. Replace each occurrence with “C:\\Users\\user_name\\opl\\project_name\\”.)
