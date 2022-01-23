@@ -29,7 +29,7 @@ step 0 - sampling from data
 NOTE: Running the whle script from the beginning will overwrite the results file
 '''
 nb_draws= 200       # set the number of sampling
-sample_size= 0.2     # set the sample size as a fraction of the original data
+sample_size= 0.8     # set the sample size as a fraction of the original data
 
 for s in range(nb_draws): # Set s to the desired draw and run from this line to avoid overwriting results !
     looptime = time.time() - t
@@ -285,6 +285,33 @@ with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\money_allocation.xlsx', en
 with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\money_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
     df_2.to_excel(writer, header=df_2.columns, index=False, sheet_name= '2-level Branching')
 
+df_1 = df_1.reset_index(drop=True)
+df_2 = df_2.reset_index(drop=True)
+
+"""
+Stricly better ratios matrix
+"""
+x=0
+y=0
+p=0
+df_3 = pd.DataFrame()
+df_3["Obs_Char"] = df_2["Obs_Char"]
+
+for z in df_3["Obs_Char"]:
+    df_3[z] = 0  
+
+i=0 
+for i in range(len(df_2)):
+    for y in range(len(df_2)):
+        for x in range(200):
+                if df_2['Ratio_'+str(x+1)][i] < df_2['Ratio_'+str(x+1)][y]:
+                    p = p+1
+        df_3.iloc[y,i+1] = (p/200)*100
+        p=0
+
+with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\money_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
+    df_3.to_excel(writer, header=df_3.columns, index=False, sheet_name= 'Strictly Better Matrix')
+
 '''
 4bis - calculate kappa ratios and report the results for time allocation task 
 '''
@@ -339,9 +366,39 @@ with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\time_allocation.xlsx', eng
 with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\time_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
     df_2.to_excel(writer, header=df_2.columns, index=False, sheet_name= '2-level Branching')
 
+df_1 = df_1.reset_index(drop=True)
+df_2 = df_2.reset_index(drop=True)
+
+"""
+Stricly better ratios matrix
+"""
+x=0
+y=0
+p=0
+df_3 = pd.DataFrame()
+df_3["Obs_Char"] = df_2["Obs_Char"]
+
+for z in df_3["Obs_Char"]:
+    df_3[z] = 0  
+
+i=0 
+for i in range(len(df_2)):
+    for y in range(len(df_2)):
+        for x in range(200):
+                if df_2['Ratio_'+str(x+1)][i] < df_2['Ratio_'+str(x+1)][y]:
+                    p = p+1
+        df_3.iloc[y,i+1] = (p/200)*100
+        p=0
+
+with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\time_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
+    df_3.to_excel(writer, header=df_3.columns, index=False, sheet_name= 'Strictly Better Matrix')
+
 '''
 CONCLUDING INFORMATION
 '''
 elapsed = time.time() - t
 print('Computation done with ' + str(nb_draws) + ' subsamples whose size equals ' + str(sample_size*100) +  ' percent of the original data. \nTotal elapsed time (in seconds): ' 
       + str(elapsed) + '\nAverage loop length (in seconds): ' + str(elapsed/nb_draws))
+
+
+
