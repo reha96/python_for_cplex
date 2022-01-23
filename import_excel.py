@@ -32,6 +32,10 @@ dfb['Sample std'] = dfb.std(axis=1, numeric_only=True)
 df_1 = dfb[dfb["Obs_Char"].str.contains("and")==False]
 df_2 = dfb[dfb["Obs_Char"].str.contains("and")==True]
 df_1 = df_1[df_1["Obs_Char"].str.contains("Allocation")==False]
+df_1 = df_1.sort_values("Mean")
+df_2 = df_2.sort_values("Mean")
+df_1 = df_1.reset_index(drop=True)
+df_2 = df_2.reset_index(drop=True)
 
 with pd.ExcelWriter('time_allocation_60.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
     df_1.to_excel(writer, header=df_1.columns, index=False, sheet_name= '1-level Branching')
@@ -64,6 +68,10 @@ dfb['Sample std'] = dfb.std(axis=1, numeric_only=True)
 df_1 = dfb[dfb["Obs_Char"].str.contains("and")==False]
 df_2 = dfb[dfb["Obs_Char"].str.contains("and")==True]
 df_1 = df_1[df_1["Obs_Char"].str.contains("Allocation")==False]
+df_1 = df_1.sort_values("Mean")
+df_2 = df_2.sort_values("Mean")
+df_1 = df_1.reset_index(drop=True)
+df_2 = df_2.reset_index(drop=True)
 
 with pd.ExcelWriter('time_allocation_80.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
     df_1.to_excel(writer, header=df_1.columns, index=False, sheet_name= '1-level Branching')
@@ -98,6 +106,10 @@ dfb['Sample std'] = dfb.std(axis=1, numeric_only=True)
 df_1 = dfb[dfb["Obs_Char"].str.contains("and")==False]
 df_2 = dfb[dfb["Obs_Char"].str.contains("and")==True]
 df_1 = df_1[df_1["Obs_Char"].str.contains("Allocation")==False]
+df_1 = df_1.sort_values("Mean")
+df_2 = df_2.sort_values("Mean")
+df_1 = df_1.reset_index(drop=True)
+df_2 = df_2.reset_index(drop=True)
 
 with pd.ExcelWriter('money_allocation_60.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
     df_1.to_excel(writer, header=df_1.columns, index=False, sheet_name= '1-level Branching')
@@ -130,6 +142,10 @@ dfb['Sample std'] = dfb.std(axis=1, numeric_only=True)
 df_1 = dfb[dfb["Obs_Char"].str.contains("and")==False]
 df_2 = dfb[dfb["Obs_Char"].str.contains("and")==True]
 df_1 = df_1[df_1["Obs_Char"].str.contains("Allocation")==False]
+df_1 = df_1.sort_values("Mean")
+df_2 = df_2.sort_values("Mean")
+df_1 = df_1.reset_index(drop=True)
+df_2 = df_2.reset_index(drop=True)
 
 with pd.ExcelWriter('money_allocation_80.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
     df_1.to_excel(writer, header=df_1.columns, index=False, sheet_name= '1-level Branching')
