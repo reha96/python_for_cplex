@@ -28,8 +28,8 @@ step 0 - sampling from data
 
 NOTE: Running the whle script from the beginning will overwrite the results file
 '''
-nb_draws= 200       # set the number of sampling
-sample_size= 0.8     # set the sample size as a fraction of the original data
+nb_draws= 3       # set the number of sampling
+sample_size= 0.02     # set the sample size as a fraction of the original data
 
 for s in range(nb_draws): # Set s to the desired draw and run from this line to avoid overwriting results !
     looptime = time.time() - t
@@ -303,10 +303,10 @@ for z in df_3["Obs_Char"]:
 i=0 
 for i in range(len(df_2)):
     for y in range(len(df_2)):
-        for x in range(200):
+        for x in range(nb_draws):
                 if df_2['Ratio_'+str(x+1)][i] < df_2['Ratio_'+str(x+1)][y]:
                     p = p+1
-        df_3.iloc[y,i+1] = (p/200)*100
+        df_3.iloc[y,i+1] = (p/nb_draws)*100
         p=0
 
 with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\money_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
@@ -384,10 +384,10 @@ for z in df_3["Obs_Char"]:
 i=0 
 for i in range(len(df_2)):
     for y in range(len(df_2)):
-        for x in range(200):
+        for x in range(nb_draws):
                 if df_2['Ratio_'+str(x+1)][i] < df_2['Ratio_'+str(x+1)][y]:
                     p = p+1
-        df_3.iloc[y,i+1] = (p/200)*100
+        df_3.iloc[y,i+1] = (p/nb_draws)*100
         p=0
 
 with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\time_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
