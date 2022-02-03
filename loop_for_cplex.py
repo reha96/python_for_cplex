@@ -313,7 +313,7 @@ df_3 = df_3.transpose()
 df_3.columns = df_3.iloc[0]
 df_3 = df_3[1:]
 with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\money_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
-    df_3.to_excel(writer, header=df_3.columns, index=False, sheet_name= 'Strictly Better Matrix')
+    df_3.to_excel(writer, header=df_3.columns, index=True, sheet_name= 'Strictly Better Matrix')
 
 '''
 4bis - calculate kappa ratios and report the results for time allocation task 
@@ -396,7 +396,7 @@ df_3 = df_3.transpose()
 df_3.columns = df_3.iloc[0]
 df_3 = df_3[1:]
 with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\time_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
-    df_3.to_excel(writer, header=df_3.columns, index=False, sheet_name= 'Strictly Better Matrix')
+    df_3.to_excel(writer, header=df_3.columns, index=True, sheet_name= 'Strictly Better Matrix')
 
 '''
 CONCLUDING INFORMATION
