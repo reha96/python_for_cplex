@@ -338,7 +338,7 @@ df_3 = df_3.transpose()
 df_3.columns = df_3.iloc[0]
 df_3 = df_3[1:]
 with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\money_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
-    df_3.to_excel(writer, header=df_3.columns, index=False, sheet_name= 'Strictly Better Matrix 2-level')
+    df_3.to_excel(writer, header=df_3.columns, index=True, sheet_name= 'Strictly Better Matrix 2-level')
     
     
 
@@ -449,7 +449,7 @@ df_3 = df_3.transpose()
 df_3.columns = df_3.iloc[0]
 df_3 = df_3[1:]
 with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\time_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
-    df_3.to_excel(writer, header=df_3.columns, index=False, sheet_name= 'Strictly Better Matrix 2-level')
+    df_3.to_excel(writer, header=df_3.columns, index=True, sheet_name= 'Strictly Better Matrix 2-level')
 
 
 '''
@@ -458,6 +458,4 @@ CONCLUDING INFORMATION
 elapsed = time.time() - t
 print('Computation done with ' + str(nb_draws) + ' subsamples whose size equals ' + str(sample_size*100) +  ' percent of the original data. \nTotal elapsed time (in seconds): ' 
       + str(elapsed) + '\nAverage loop length (in seconds): ' + str(elapsed/nb_draws))
-
-
 
