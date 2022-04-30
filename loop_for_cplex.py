@@ -8,12 +8,6 @@ t = time.time()
 # close Excel and ILOG Studio before running the code
 data = pd.read_excel('C:\\Users\\rehat\\opl\\project1\\data.xlsx', sheet_name="python")
 
-df2 = Workbook()
-df2.save(filename='C:\\Users\\rehat\\opl\\project1\\money_allocation.xlsx') # prepare the results file for the money allocation task
-
-df2bis = Workbook()
-df2bis.save(filename='C:\\Users\\rehat\\opl\\project1\\time_allocation.xlsx') # prepare the results file for the time allocation task
-
 df3 = [] # to calculate ratios and store types for money allocation task
 df3bis = [] # to calculate ratios and store types for time allocation task
 
@@ -28,15 +22,19 @@ step 0 - sampling from data
 
 NOTE: Running the whle script from the beginning will overwrite the results file
 '''
-nb_draws= 3       # set the number of sampling
-sample_size= 0.02     # set the sample size as a fraction of the original data
+nb_draws= 200       # set the number of sampling
+sample_size= 0.8    # set the sample size as a fraction of the original data
 
 for s in range(nb_draws): # Set s to the desired draw and run from this line to avoid overwriting results !
     looptime = time.time() - t
     print('Loop ' + str(s+1) + ' started, elapsed time: ' + str(looptime))
     df = data.sort_values("ID")
-    df = df.sample(frac=sample_size) # add random_state to set seed and to compare both tasks
-    df.to_excel('C:\\Users\\rehat\\opl\\project1\\data_for_python.xlsx', index=False)    
+    df = df.sample(frac=sample_size) # add random_state to set seed if need be
+    df.to_excel('C:\\Users\\rehat\\opl\\project1\\data_for_python.xlsx', index=False) 
+    df2 = Workbook()
+    df2.save(filename='C:\\Users\\rehat\\opl\\project1\\money_allocation.xlsx') # prepare the results file for the money allocation task
+    df2bis = Workbook()
+    df2bis.save(filename='C:\\Users\\rehat\\opl\\project1\\time_allocation.xlsx') # prepare the results file for the time allocation task
     '''
     1st step - no categories (finding tau_hat) for MONEY ALLOCATION TASK
     '''
@@ -278,6 +276,10 @@ dfb['Sample std'] = dfb.std(axis=1, numeric_only=True)
 df_1 = dfb[dfb["Obs_Char"].str.contains("and")==False]
 df_2 = dfb[dfb["Obs_Char"].str.contains("and")==True]
 df_1 = df_1[df_1["Obs_Char"].str.contains("Allocation")==False]
+df_1 = df_1.sort_values("Mean")
+df_2 = df_2.sort_values("Mean")
+df_1 = df_1.reset_index(drop=True)
+df_2 = df_2.reset_index(drop=True)
 
 with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\money_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
     df_1.to_excel(writer, header=df_1.columns, index=False, sheet_name= '1-level Branching')
@@ -285,12 +287,35 @@ with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\money_allocation.xlsx', en
 with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\money_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
     df_2.to_excel(writer, header=df_2.columns, index=False, sheet_name= '2-level Branching')
 
-df_1 = df_1.reset_index(drop=True)
-df_2 = df_2.reset_index(drop=True)
 
 """
 Stricly better ratios matrix
 """
+
+x=0
+y=0
+p=0
+df_3 = pd.DataFrame()
+df_3["Obs_Char"] = df_1["Obs_Char"]
+
+for z in df_3["Obs_Char"]:
+    df_3[z] = 0  
+
+i=0 
+for i in range(len(df_1)):
+    for y in range(len(df_1)):
+        for x in range(nb_draws):
+                if df_1['Ratio_'+str(x+1)][i] < df_1['Ratio_'+str(x+1)][y]:
+                    p = p+1
+        df_3.iloc[y,i+1] = (p/nb_draws)*100
+        p=0
+
+df_3 = df_3.transpose()
+df_3.columns = df_3.iloc[0]
+df_3 = df_3[1:]
+with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\money_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
+    df_3.to_excel(writer, header=df_3.columns, index=True, sheet_name= 'Strictly Better Matrix 1-level')
+
 x=0
 y=0
 p=0
@@ -313,7 +338,9 @@ df_3 = df_3.transpose()
 df_3.columns = df_3.iloc[0]
 df_3 = df_3[1:]
 with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\money_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
-    df_3.to_excel(writer, header=df_3.columns, index=True, sheet_name= 'Strictly Better Matrix')
+    df_3.to_excel(writer, header=df_3.columns, index=False, sheet_name= 'Strictly Better Matrix 2-level')
+    
+    
 
 '''
 4bis - calculate kappa ratios and report the results for time allocation task 
@@ -362,6 +389,10 @@ dfb['Sample std'] = dfb.std(axis=1, numeric_only=True)
 df_1 = dfb[dfb["Obs_Char"].str.contains("and")==False]
 df_2 = dfb[dfb["Obs_Char"].str.contains("and")==True]
 df_1 = df_1[df_1["Obs_Char"].str.contains("Allocation")==False]
+df_1 = df_1.sort_values("Mean")
+df_2 = df_2.sort_values("Mean")
+df_1 = df_1.reset_index(drop=True)
+df_2 = df_2.reset_index(drop=True)
 
 with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\time_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
     df_1.to_excel(writer, header=df_1.columns, index=False, sheet_name= '1-level Branching')
@@ -369,12 +400,33 @@ with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\time_allocation.xlsx', eng
 with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\time_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
     df_2.to_excel(writer, header=df_2.columns, index=False, sheet_name= '2-level Branching')
 
-df_1 = df_1.reset_index(drop=True)
-df_2 = df_2.reset_index(drop=True)
-
 """
 Stricly better ratios matrix
 """
+x=0
+y=0
+p=0
+df_3 = pd.DataFrame()
+df_3["Obs_Char"] = df_1["Obs_Char"]
+
+for z in df_3["Obs_Char"]:
+    df_3[z] = 0  
+
+i=0 
+for i in range(len(df_1)):
+    for y in range(len(df_1)):
+        for x in range(nb_draws):
+                if df_1['Ratio_'+str(x+1)][i] < df_1['Ratio_'+str(x+1)][y]:
+                    p = p+1
+        df_3.iloc[y,i+1] = (p/nb_draws)*100
+        p=0
+
+df_3 = df_3.transpose()
+df_3.columns = df_3.iloc[0]
+df_3 = df_3[1:]
+with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\time_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
+    df_3.to_excel(writer, header=df_3.columns, index=True, sheet_name= 'Strictly Better Matrix 1-level')
+
 x=0
 y=0
 p=0
@@ -392,11 +444,13 @@ for i in range(len(df_2)):
                     p = p+1
         df_3.iloc[y,i+1] = (p/nb_draws)*100
         p=0
+
 df_3 = df_3.transpose()
 df_3.columns = df_3.iloc[0]
 df_3 = df_3[1:]
 with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\time_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:  
-    df_3.to_excel(writer, header=df_3.columns, index=True, sheet_name= 'Strictly Better Matrix')
+    df_3.to_excel(writer, header=df_3.columns, index=False, sheet_name= 'Strictly Better Matrix 2-level')
+
 
 '''
 CONCLUDING INFORMATION
@@ -404,3 +458,6 @@ CONCLUDING INFORMATION
 elapsed = time.time() - t
 print('Computation done with ' + str(nb_draws) + ' subsamples whose size equals ' + str(sample_size*100) +  ' percent of the original data. \nTotal elapsed time (in seconds): ' 
       + str(elapsed) + '\nAverage loop length (in seconds): ' + str(elapsed/nb_draws))
+
+
+
