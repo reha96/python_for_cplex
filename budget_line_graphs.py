@@ -99,14 +99,14 @@ plt.plot(b3x,b3y, label='Budget 3')
 plt.plot(b4x,b4y, label='Budget 4')
 
 plt.plot(b5x,b5y, label='Budget 5')
-plt.plot(b6x,b6y, label='Budget 6')
+plt.plot(b6x,b6y, '--', label='Budget 6')
 
 plt.plot(b7x,b7y, label='Budget 7')
-plt.plot(b8x,b8y, label='Budget 8')
+plt.plot(b8x,b8y, '--', label='Budget 8')
 plt.plot(b9x,b9y, label='Budget 9')
 
-# plt.plot(b10x,b10y, label='Budget 10')
-# plt.plot(b11x,b11y, label='Budget 11')
+plt.plot(b10x,b10y, label='Budget 10')
+plt.plot(b11x,b11y, label='Budget 11')
 
 plt.xlabel("Labor (consumption possibility)")
 plt.ylabel("Leisure")
