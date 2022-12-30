@@ -13,7 +13,7 @@ logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S
 
 t = time.time()
 
-configuration = 'Original'  # set configuration (sheet)
+configuration = 'Full'  # set configuration (sheets: 'Full', 'Core_8_9', 'Additional_6_8')
 
 data_where = 'C:\\Users\\rehat\\opl\\project1\\AllExercices.xlsx'  # set data location
 
@@ -37,8 +37,8 @@ step 0 - sampling from data
 
 NOTE: Running the whole script from the beginning will overwrite the results file
 '''
-nb_draws = 1     # set the number of sampling
-sample_size = 0.999    # set the sample size as a fraction of the original data. For example: 0.8, 0.6, and 0.999 for 80 pcent, 60 pcent and full sample
+nb_draws = 1     # set the number of sampling (1 or 200)
+sample_size = 0.999    # set the sample size as a fraction of the original data. For example: 0.8 or 0.999 for 80% and full sample
 
 logging.info('Data Location: ' + data_where +
              ' Configuration: ' + configuration + ' Draws: ' + str(nb_draws) + ' Sample Size: ' + str(sample_size))
