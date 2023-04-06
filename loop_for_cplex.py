@@ -13,13 +13,18 @@ logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S
 
 t = time.time()
 
-configuration = 'Full'  # set configuration (sheets: 'Full', 'Core_8_9', 'Additional_6_8')
+# set configuration (sheets: 'Full', 'Core_8_9', 'Additional_6_8')
+configuration = 'Core_8_9'
+
+branching_level = '1-level'  # set branching level ('1-level' or '2-level')
+
+permutation_exercise = True  # set True or False
 
 data_where = 'C:\\Users\\rehat\\opl\\project1\\AllExercices.xlsx'  # set data location
 
 data = pd.read_excel(data_where, sheet_name=configuration)
 
-tasks_which = 'time' # select 'all', 'money', 'time'
+tasks_which = 'all'  # select 'all', 'money', 'time'
 
 
 df3 = []  # to calculate ratios and store types for money allocation task
@@ -37,8 +42,9 @@ step 0 - sampling from data
 
 NOTE: Running the whole script from the beginning will overwrite the results file
 '''
-nb_draws = 1     # set the number of sampling (1 or 200)
-sample_size = 0.999    # set the sample size as a fraction of the original data. For example: 0.8 or 0.999 for 80% and full sample
+nb_draws = 200   # set the number of sampling (1 or 200)
+# set the sample size as a fraction of the original data. For example: 0.8 or 0.999 for 80% and full sample
+sample_size = 0.999
 
 logging.info('Data Location: ' + data_where +
              ' Configuration: ' + configuration + ' Draws: ' + str(nb_draws) + ' Sample Size: ' + str(sample_size))
@@ -50,24 +56,33 @@ for s in range(nb_draws):
     logging.info('Loop ' + str(s+1) +
                  ' started, elapsed time: ' + str(looptime))
     df = data.sort_values("ID")
-    df = df.sample(frac=sample_size)  # add random_state to set seed if need be
+    df = df.sample(frac=sample_size).reset_index(drop='true')
+
     df.to_excel(
         'C:\\Users\\rehat\\opl\\project1\\data_for_python.xlsx', index=False)
     if tasks_which == 'all' or tasks_which == 'money':
         df2 = Workbook()
         # prepare the results file for the money allocation task
         df2.save(filename='C:\\Users\\rehat\\opl\\project1\\money_allocation.xlsx')
-    if tasks_which == 'all' or tasks_which ==  'time':
+    if tasks_which == 'all' or tasks_which == 'time':
         df2bis = Workbook()
         # prepare the results file for the time allocation task
-        df2bis.save(filename='C:\\Users\\rehat\\opl\\project1\\time_allocation.xlsx')
+        df2bis.save(
+            filename='C:\\Users\\rehat\\opl\\project1\\time_allocation.xlsx')
     '''
     1st step - no categories (finding tau_hat) for MONEY ALLOCATION TASK
     '''
     if tasks_which == 'all' or tasks_which == 'money':
-        i = 1  # counter for excel cells (to properly store output in results file)
+        # sample once for each task
+        if permutation_exercise == True:
+            df['Marital Status'] = data['Marital Status'].sample(
+                frac=sample_size).reset_index(drop='true')
+
+        # counter for excel cells (to properly store output in results file)
+        i = 1
         with open("C:\\Users\\rehat\\opl\\project1\\part.dat", 'w') as f:
-            f.write('NR_Goods=2;\n'+'SheetConnection comm("data_for_python.xlsx");\n')
+            f.write('NR_Goods=2;\n' +
+                    'SheetConnection comm("data_for_python.xlsx");\n')
             f.write('NR_Observations= ' + str(len(df)) + ';\n')
             f.write("""AllP from SheetRead(comm,"'Sheet1'!E2:F""" +
                     str(len(df)+1)+"""");\n""")
@@ -139,6 +154,9 @@ for s in range(nb_draws):
         '''
         for j in df[['Gender', 'Age', 'Education', 'Marital Status', 'Employment']]:
             for k in df[['Gender', 'Age', 'Education', 'Marital Status', 'Employment']]:
+                # skip 2-level
+                if branching_level == '1-level':
+                    continue
                 # there should be an elegant way to do this but let's do it manually since it's just 5 choose 2
                 if j == 'Age' and k == 'Gender':
                     continue
@@ -158,7 +176,8 @@ for s in range(nb_draws):
                     with open("C:\\Users\\rehat\\opl\\project1\\part.dat", 'w') as f:
                         f.write('NR_Goods=2;\n' +
                                 'SheetConnection comm("data_for_python.xlsx");\n')
-                        f.write('NR_Observations= ' + str(d['Count'][l]) + ';\n')
+                        f.write('NR_Observations= ' +
+                                str(d['Count'][l]) + ';\n')
                         if l == 0:
                             f.write(
                                 """AllP from SheetRead(comm,"'Sheet1'!E2:F""" + str(d['Count'][l]+1)+"""");\n""")
@@ -175,7 +194,8 @@ for s in range(nb_draws):
                             f.write("""Income from SheetRead(comm,"'Sheet1'!G""" +
                                     str(n+2)+""":G""" + str(n+d['Count'][l]+1)+"""");\n""")
                             n = n+d['Count'][l]
-                        f.write('SheetConnection comm2("money_allocation.xlsx");\n')
+                        f.write(
+                            'SheetConnection comm2("money_allocation.xlsx");\n')
                         f.write("""NR_Types to SheetWrite(comm2,"'Sheet'!"""+str(chr(c)) +
                                 """"""+str(i)+""":"""+str(chr(c))+""""""+str(i)+"""");\n""")
                         f.write("""NR_Observations to SheetWrite(comm2,"'Sheet'!D""" +
@@ -184,7 +204,8 @@ for s in range(nb_draws):
                                 str(d[j][l])+' and ' + str(d[k][l]) + '";\n')
                         f.write("""runtype2 to SheetWrite(comm2,"'Sheet'!B""" +
                                 str(i)+""":B"""+str(i)+"""");\n""")
-                        f.write('runtype = "'+str(j)+' and ' + str(k)+'";\n')
+                        f.write('runtype = "'+str(j) +
+                                ' and ' + str(k)+'";\n')
                         f.write("""runtype to SheetWrite(comm2,"'Sheet'!A""" +
                                 str(i)+""":A"""+str(i)+"""");\n""")
                     call(["oplrun.exe", "C:\\Users\\rehat\\opl\\project1\\part.mod",
@@ -201,9 +222,15 @@ for s in range(nb_draws):
     1bis - no categories (finding tau_hat) for TIME ALLOCATION TASK
     '''
     if tasks_which == 'all' or tasks_which == 'time':
-        i = 1  # counter for excel cells (to properly store output in results file)
+        # sample once for each task
+        if permutation_exercise == True:
+            df['Marital Status'] = data['Marital Status'].sample(
+                frac=sample_size).reset_index(drop='true')
+        # counter for excel cells (to properly store output in results file)
+        i = 1
         with open("C:\\Users\\rehat\\opl\\project1\\part.dat", 'w') as f:
-            f.write('NR_Goods=2;\n'+'SheetConnection comm("data_for_python.xlsx");\n')
+            f.write('NR_Goods=2;\n' +
+                    'SheetConnection comm("data_for_python.xlsx");\n')
             f.write('NR_Observations= ' + str(len(df)) + ';\n')
             f.write("""AllP from SheetRead(comm,"'Sheet1'!K2:L""" +
                     str(len(df)+1)+"""");\n""")
@@ -275,6 +302,9 @@ for s in range(nb_draws):
         '''
         for j in df[['Gender', 'Age', 'Education', 'Marital Status', 'Employment']]:
             for k in df[['Gender', 'Age', 'Education', 'Marital Status', 'Employment']]:
+                # skip 2-level
+                if branching_level == '1-level':
+                    continue
                 # there should be an elegant way to do this but let's do it manually since it's just 5 choose 2
                 if j == 'Age' and k == 'Gender':
                     continue
@@ -294,7 +324,8 @@ for s in range(nb_draws):
                     with open("C:\\Users\\rehat\\opl\\project1\\part.dat", 'w') as f:
                         f.write('NR_Goods=2;\n' +
                                 'SheetConnection comm("data_for_python.xlsx");\n')
-                        f.write('NR_Observations= ' + str(d['Count'][l]) + ';\n')
+                        f.write('NR_Observations= ' +
+                                str(d['Count'][l]) + ';\n')
                         if l == 0:
                             f.write(
                                 """AllP from SheetRead(comm,"'Sheet1'!K2:L""" + str(d['Count'][l]+1)+"""");\n""")
@@ -311,7 +342,8 @@ for s in range(nb_draws):
                             f.write("""Income from SheetRead(comm,"'Sheet1'!M""" +
                                     str(n+2)+""":M""" + str(n+d['Count'][l]+1)+"""");\n""")
                             n = n+d['Count'][l]
-                        f.write('SheetConnection comm2("time_allocation.xlsx");\n')
+                        f.write(
+                            'SheetConnection comm2("time_allocation.xlsx");\n')
                         f.write("""NR_Types to SheetWrite(comm2,"'Sheet'!"""+str(chr(c)) +
                                 """"""+str(i)+""":"""+str(chr(c))+""""""+str(i)+"""");\n""")
                         f.write("""NR_Observations to SheetWrite(comm2,"'Sheet'!D""" +
@@ -320,7 +352,8 @@ for s in range(nb_draws):
                                 str(d[j][l])+' and ' + str(d[k][l]) + '";\n')
                         f.write("""runtype2 to SheetWrite(comm2,"'Sheet'!B""" +
                                 str(i)+""":B"""+str(i)+"""");\n""")
-                        f.write('runtype = "'+str(j)+' and ' + str(k)+'";\n')
+                        f.write('runtype = "'+str(j) +
+                                ' and ' + str(k)+'";\n')
                         f.write("""runtype to SheetWrite(comm2,"'Sheet'!A""" +
                                 str(i)+""":A"""+str(i)+"""");\n""")
                     call(["oplrun.exe", "C:\\Users\\rehat\\opl\\project1\\part.mod",
@@ -339,48 +372,50 @@ for s in range(nb_draws):
 '''
 if tasks_which == 'all' or tasks_which == 'money':
     resultcopy = df3[:]  # copy of results so things do not get lost
-    
+
     df5 = pd.DataFrame()  # intermediate dataframe object combining best 2-level values
-    
+
     x = 0
     for x in range(len(df3)):
         df3[x] = df3[x].rename(columns={3: 'n'})
         df3[x] = df3[x].rename(columns={2: 'Types'})
         df3[x] = df3[x].rename(columns={1: 'State'})
         df3[x] = df3[x].rename(columns={0: 'Obs_Char'})
-    
+
     x = 0
     for x in range(len(df3)):
         df3[x]['Sum_Types'] = df3[x].groupby(
             ['Obs_Char'])['Types'].transform('sum')
-        df3[x]['Ratio_' + str(x+1)] = df3[x]['Sum_Types']/df3[x]['Sum_Types'][0]
+        df3[x]['Ratio_' + str(x+1)] = df3[x]['Sum_Types'] / \
+            df3[x]['Sum_Types'][0]
         df3[x] = df3[x].sort_values('Obs_Char')
         with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\money_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:
             df3[x].to_excel(writer, header=["Obs_Char", "State", "Types",
                             "n", "Sum_Types", "Ratio"], index=False, sheet_name=str(x+1))
-    
+
     d = pd.read_excel(
         'C:\\Users\\rehat\\opl\\project1\\money_allocation.xlsx', sheet_name=None)
     dfa = []
     dfb = pd.DataFrame()
-    
+
     x = 0
     for x in range(nb_draws):
         dfa.append(d[str(x+1)])
-    
+
     x = 0
     for x in range(len(dfa)):
-        dfa[x] = dfa[x].drop_duplicates(subset=['Obs_Char', 'Ratio'], keep='first')
+        dfa[x] = dfa[x].drop_duplicates(
+            subset=['Obs_Char', 'Ratio'], keep='first')
         dfa[x] = dfa[x].rename(columns={'Ratio': 'Ratio_'+str(x+1)})
         dfb = dfb.append(dfa[x])
-    
+
     dfb = dfb.drop(['Types', 'n', 'State', 'Sum_Types'], 'columns')
     dfb = dfb.reset_index(drop=True)
     dfb = dfb.groupby(['Obs_Char'], as_index=False).sum()
     dfb = dfb.replace(0, np.nan)
     dfb['Mean'] = dfb.mean(axis=1, numeric_only=True)
     dfb['Sample std'] = dfb.std(axis=1, numeric_only=True)
-    
+
     df_1 = dfb[dfb["Obs_Char"].str.contains("and") == False]
     df_2 = dfb[dfb["Obs_Char"].str.contains("and") == True]
     df_1 = df_1[df_1["Obs_Char"].str.contains("Allocation") == False]
@@ -388,29 +423,28 @@ if tasks_which == 'all' or tasks_which == 'money':
     df_2 = df_2.sort_values("Mean")
     df_1 = df_1.reset_index(drop=True)
     df_2 = df_2.reset_index(drop=True)
-    
+
     with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\money_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:
         df_1.to_excel(writer, header=df_1.columns, index=False,
                       sheet_name='1-level Branching')
-    
+
     with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\money_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:
         df_2.to_excel(writer, header=df_2.columns, index=False,
                       sheet_name='2-level Branching')
-    
-    
+
     """
     Stricly better ratios matrix
     """
-    
+
     x = 0
     y = 0
     p = 0
     df_3 = pd.DataFrame()
     df_3["Obs_Char"] = df_1["Obs_Char"]
-    
+
     for z in df_3["Obs_Char"]:
         df_3[z] = 0
-    
+
     i = 0
     for i in range(len(df_1)):
         for y in range(len(df_1)):
@@ -419,23 +453,23 @@ if tasks_which == 'all' or tasks_which == 'money':
                     p = p+1
             df_3.iloc[y, i+1] = (p/nb_draws)*100
             p = 0
-    
+
     df_3 = df_3.transpose()
     df_3.columns = df_3.iloc[0]
     df_3 = df_3[1:]
     with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\money_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:
         df_3.to_excel(writer, header=df_3.columns, index=True,
                       sheet_name='Strictly Better Matrix 1-level')
-    
+
     x = 0
     y = 0
     p = 0
     df_3 = pd.DataFrame()
     df_3["Obs_Char"] = df_2["Obs_Char"]
-    
+
     for z in df_3["Obs_Char"]:
         df_3[z] = 0
-    
+
     i = 0
     for i in range(len(df_2)):
         for y in range(len(df_2)):
@@ -444,7 +478,7 @@ if tasks_which == 'all' or tasks_which == 'money':
                     p = p+1
             df_3.iloc[y, i+1] = (p/nb_draws)*100
             p = 0
-    
+
     df_3 = df_3.transpose()
     df_3.columns = df_3.iloc[0]
     df_3 = df_3[1:]
@@ -458,16 +492,16 @@ if tasks_which == 'all' or tasks_which == 'money':
 '''
 if tasks_which == 'all' or tasks_which == 'time':
     resultcopybis = df3bis[:]  # copy of results so things do not get lost
-    
+
     df5bis = pd.DataFrame()  # intermediate dataframe object combining best 2-level values
-    
+
     x = 0
     for x in range(len(df3bis)):
         df3bis[x] = df3bis[x].rename(columns={3: 'n'})
         df3bis[x] = df3bis[x].rename(columns={2: 'Types'})
         df3bis[x] = df3bis[x].rename(columns={1: 'State'})
         df3bis[x] = df3bis[x].rename(columns={0: 'Obs_Char'})
-    
+
     x = 0
     for x in range(len(df3bis)):
         df3bis[x]['Sum_Types'] = df3bis[x].groupby(
@@ -478,30 +512,31 @@ if tasks_which == 'all' or tasks_which == 'time':
         with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\time_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:
             df3bis[x].to_excel(writer, header=["Obs_Char", "State", "Types",
                                "n", "Sum_Types", "Ratio"], index=False, sheet_name=str(x+1))
-    
+
     d = pd.read_excel(
         'C:\\Users\\rehat\\opl\\project1\\time_allocation.xlsx', sheet_name=None)
-    
+
     dfa = []
     dfb = pd.DataFrame()
-    
+
     x = 0
     for x in range(nb_draws):
         dfa.append(d[str(x+1)])
-    
+
     x = 0
     for x in range(len(dfa)):
-        dfa[x] = dfa[x].drop_duplicates(subset=['Obs_Char', 'Ratio'], keep='first')
+        dfa[x] = dfa[x].drop_duplicates(
+            subset=['Obs_Char', 'Ratio'], keep='first')
         dfa[x] = dfa[x].rename(columns={'Ratio': 'Ratio_'+str(x+1)})
         dfb = dfb.append(dfa[x])
-    
+
     dfb = dfb.drop(['Types', 'n', 'State', 'Sum_Types'], 'columns')
     dfb = dfb.reset_index(drop=True)
     dfb = dfb.groupby(['Obs_Char'], as_index=False).sum()
     dfb = dfb.replace(0, np.nan)
     dfb['Mean'] = dfb.mean(axis=1, numeric_only=True)
     dfb['Sample std'] = dfb.std(axis=1, numeric_only=True)
-    
+
     df_1 = dfb[dfb["Obs_Char"].str.contains("and") == False]
     df_2 = dfb[dfb["Obs_Char"].str.contains("and") == True]
     df_1 = df_1[df_1["Obs_Char"].str.contains("Allocation") == False]
@@ -509,15 +544,15 @@ if tasks_which == 'all' or tasks_which == 'time':
     df_2 = df_2.sort_values("Mean")
     df_1 = df_1.reset_index(drop=True)
     df_2 = df_2.reset_index(drop=True)
-    
+
     with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\time_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:
         df_1.to_excel(writer, header=df_1.columns, index=False,
                       sheet_name='1-level Branching')
-    
+
     with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\time_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:
         df_2.to_excel(writer, header=df_2.columns, index=False,
                       sheet_name='2-level Branching')
-    
+
     """
     Stricly better ratios matrix
     """
@@ -526,10 +561,10 @@ if tasks_which == 'all' or tasks_which == 'time':
     p = 0
     df_3 = pd.DataFrame()
     df_3["Obs_Char"] = df_1["Obs_Char"]
-    
+
     for z in df_3["Obs_Char"]:
         df_3[z] = 0
-    
+
     i = 0
     for i in range(len(df_1)):
         for y in range(len(df_1)):
@@ -538,23 +573,23 @@ if tasks_which == 'all' or tasks_which == 'time':
                     p = p+1
             df_3.iloc[y, i+1] = (p/nb_draws)*100
             p = 0
-    
+
     df_3 = df_3.transpose()
     df_3.columns = df_3.iloc[0]
     df_3 = df_3[1:]
     with pd.ExcelWriter('C:\\Users\\rehat\\opl\\project1\\time_allocation.xlsx', engine="openpyxl", mode='a', if_sheet_exists='new') as writer:
         df_3.to_excel(writer, header=df_3.columns, index=True,
                       sheet_name='Strictly Better Matrix 1-level')
-    
+
     x = 0
     y = 0
     p = 0
     df_3 = pd.DataFrame()
     df_3["Obs_Char"] = df_2["Obs_Char"]
-    
+
     for z in df_3["Obs_Char"]:
         df_3[z] = 0
-    
+
     i = 0
     for i in range(len(df_2)):
         for y in range(len(df_2)):
@@ -563,7 +598,7 @@ if tasks_which == 'all' or tasks_which == 'time':
                     p = p+1
             df_3.iloc[y, i+1] = (p/nb_draws)*100
             p = 0
-    
+
     df_3 = df_3.transpose()
     df_3.columns = df_3.iloc[0]
     df_3 = df_3[1:]
