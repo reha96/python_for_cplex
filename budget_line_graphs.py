@@ -7,6 +7,7 @@ Created on Wed Sep  7 23:33:10 2022
 """
 
 import matplotlib.pyplot as plt
+plt.rcParams['figure.dpi'] = 300
 import numpy as np
 
 
